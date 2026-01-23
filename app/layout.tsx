@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import FontLoader from '@/components/FontLoader'
 
 export const metadata: Metadata = {
   title: 'Twitch Chat',
@@ -11,39 +12,21 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Récupérer le basePath depuis la variable d'environnement
-  // En développement local, cette variable peut être vide, donc on utilise une chaîne vide
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
-  // Construire le chemin complet pour les polices
-  const oliverPath = basePath ? `${basePath}/Oliver-Regular.ttf` : '/Oliver-Regular.ttf'
-  const figtreePath = basePath ? `${basePath}/Figtree-Bold.ttf` : '/Figtree-Bold.ttf'
-  
   return (
     <html lang="fr">
       <head>
         <style dangerouslySetInnerHTML={{
           __html: `
             :root { 
-              --base-path: '${basePath}';
-            }
-            @font-face {
-              font-family: 'Oliver Regular';
-              src: url('${oliverPath}') format('truetype');
-              font-weight: normal;
-              font-style: normal;
-              font-display: swap;
-            }
-            @font-face {
-              font-family: 'Figtree Bold';
-              src: url('${figtreePath}') format('truetype');
-              font-weight: 700;
-              font-style: normal;
-              font-display: swap;
+              --base-path: '${process.env.NEXT_PUBLIC_BASE_PATH || ''}';
             }
           `
         }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <FontLoader />
+        {children}
+      </body>
     </html>
   )
 }
