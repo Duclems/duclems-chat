@@ -2,21 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Oliver Regular';
-  src: var(--font-oliver, url('/Oliver-Regular.ttf')) format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Figtree Bold';
-  src: var(--font-figtree, url('/Figtree-Bold.ttf')) format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Les polices sont définies dans app/layout.tsx avec le basePath dynamique pour GitHub Pages */
 
 :root {
   --foreground-rgb: 255, 255, 255;
