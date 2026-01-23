@@ -1,17 +1,26 @@
 /**
  * Utilitaire pour gérer les chemins avec basePath pour GitHub Pages
- * Récupère le basePath depuis la variable d'environnement ou utilise la valeur par défaut
+ * Détecte automatiquement l'environnement de développement
  */
 export function getBasePath(): string {
+  // Détecter si on est en développement (localhost)
   if (typeof window !== 'undefined') {
-    // Côté client, on peut utiliser window.location pour détecter le basePath
-    // ou utiliser la variable d'environnement si elle est disponible
+    const isDevelopment = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.hostname === ''
+    
+    // En développement, pas de basePath
+    if (isDevelopment) {
+      return ''
+    }
+    
+    // En production, utiliser la variable d'environnement si disponible
     const envBasePath = process.env.NEXT_PUBLIC_BASE_PATH
     if (envBasePath) {
       return envBasePath
     }
     
-    // Sinon, essayer de détecter depuis l'URL
+    // Sinon, essayer de détecter depuis l'URL (pour GitHub Pages)
     const pathname = window.location.pathname
     // Si on est sur GitHub Pages avec un sous-dossier, le pathname commence par /nom-du-repo/
     const match = pathname.match(/^\/([^\/]+)/)
@@ -24,7 +33,12 @@ export function getBasePath(): string {
     }
   }
   
-  // Valeur par défaut ou côté serveur
+  // Côté serveur : détecter via NODE_ENV
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+    return ''
+  }
+  
+  // Valeur par défaut pour la production
   return process.env.NEXT_PUBLIC_BASE_PATH || '/duclems-chat'
 }
 

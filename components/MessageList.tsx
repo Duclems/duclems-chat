@@ -62,9 +62,9 @@ function CrownFrame({ themeColor, fontSize, hexToRgba }: CrownFrameProps) {
     return color.startsWith('#') ? color : `#${color}`
   }
 
-  // Charger le SVG de la couronne avec la couleur fixe #917e27
+  // Charger le SVG de la couronne avec la couleur fixe #ffd000
   useEffect(() => {
-    const crownColor = '#917e27'
+    const crownColor = '#ffd000'
     
     fetch(getPath('/images/icones/crown.svg'))
       .then(response => response.text())
@@ -449,26 +449,26 @@ export default function MessageList({
     setRemovedMessageIds(prev => new Set(prev).add(id))
   }, [])
 
-  // Charger le fichier CSV des custom names
+  // Charger les données depuis Google Sheets
   useEffect(() => {
-    fetch(getPath('/data/custom-names.csv'))
+    const googleSheetsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9JvSkVw7adKYRa2SCwYhFr7iVjSgtN3Oin4TLXQ-tWPpJsvXxcLLvXA30L5jriOCJNWz5q4zq0sFH/pub?gid=0&single=true&output=csv'
+    fetch(googleSheetsUrl)
       .then(response => response.text())
       .then(text => {
         const lines = text.split('\n').filter(line => line.trim())
         const map = new Map<string, string>()
         const crown = new Map<string, boolean>()
 
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(';')
-          if (values.length >= 2) {
-            const pseudonyme = values[0].trim()
-            const rename = values[1]?.trim() || ''
-            const showCrown = values[2]?.trim() === 'true' || values[2]?.trim() === '1'
-            if (pseudonyme) {
-              // Si rename existe, l'utiliser, sinon garder le pseudonyme
-              map.set(pseudonyme.toLowerCase(), rename || pseudonyme)
-              crown.set(pseudonyme.toLowerCase(), showCrown)
-            }
+        // Parser le CSV (format: pseudonyme,rename,showCrown)
+        for (let i = 0; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim())
+          if (values.length >= 1 && values[0]) {
+            const pseudonyme = values[0]
+            const rename = values[1] || ''
+            const showCrown = values[2] === '1' || values[2]?.toLowerCase() === 'true'
+            // Si rename existe, l'utiliser, sinon garder le pseudonyme
+            map.set(pseudonyme.toLowerCase(), rename || pseudonyme)
+            crown.set(pseudonyme.toLowerCase(), showCrown)
           }
         }
 
@@ -476,7 +476,7 @@ export default function MessageList({
         setCrownMap(crown)
       })
       .catch(error => {
-        console.error('Erreur lors du chargement des custom names:', error)
+        console.error('Erreur lors du chargement du Google Sheets:', error)
       })
   }, [])
 

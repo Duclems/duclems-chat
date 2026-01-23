@@ -29,34 +29,38 @@ export default function CustomPage() {
   const [customNames, setCustomNames] = useState<CustomName[]>([])
   const [themes, setThemes] = useState<Theme[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [savingThemes, setSavingThemes] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<string>('')
   const [saveThemesMessage, setSaveThemesMessage] = useState<string>('')
-  const [newPseudonyme, setNewPseudonyme] = useState('')
-  const [newRename, setNewRename] = useState('')
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const [editPseudonyme, setEditPseudonyme] = useState('')
-  const [editRename, setEditRename] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [editingThemeIndex, setEditingThemeIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    // Charger le fichier CSV
-    fetch(getPath('/data/custom-names.csv'))
+    // Charger les thèmes
+    fetch(getPath('/data/themes.json'))
+      .then(response => response.json())
+      .then(data => {
+        setThemes(data.themes || [])
+      })
+      .catch(error => {
+        console.error('Erreur lors du chargement des thèmes:', error)
+      })
+
+    // Charger le Google Sheets CSV comme source unique de données
+    const googleSheetsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9JvSkVw7adKYRa2SCwYhFr7iVjSgtN3Oin4TLXQ-tWPpJsvXxcLLvXA30L5jriOCJNWz5q4zq0sFH/pub?gid=0&single=true&output=csv'
+    fetch(googleSheetsUrl)
       .then(response => response.text())
       .then(text => {
         const lines = text.split('\n').filter(line => line.trim())
-        const headers = lines[0].split(';')
         const data: CustomName[] = []
 
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(';')
-          if (values.length >= 2) {
+        // Parser le CSV (format: pseudonyme,rename,showCrown)
+        for (let i = 0; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim())
+          if (values.length >= 1 && values[0]) {
             data.push({
-              pseudonyme: values[0].trim(),
-              rename: values[1]?.trim() || '',
-              showCrown: values[2]?.trim() === 'true' || values[2]?.trim() === '1'
+              pseudonyme: values[0],
+              rename: values[1] || '',
+              showCrown: values[2] === '1' || values[2]?.toLowerCase() === 'true'
             })
           }
         }
@@ -66,89 +70,13 @@ export default function CustomPage() {
           a.pseudonyme.localeCompare(b.pseudonyme, 'fr', { sensitivity: 'base' })
         )
         setCustomNames(sortedData)
-      })
-      .catch(error => {
-        console.error('Erreur lors du chargement du CSV:', error)
-      })
-
-    // Charger les thèmes
-    fetch(getPath('/data/themes.json'))
-      .then(response => response.json())
-      .then(data => {
-        setThemes(data.themes || [])
         setLoading(false)
       })
       .catch(error => {
-        console.error('Erreur lors du chargement des thèmes:', error)
+        console.error('Erreur lors du chargement du Google Sheets:', error)
         setLoading(false)
       })
   }, [])
-
-  const handleAdd = () => {
-    if (!newPseudonyme.trim()) return
-
-    const newItem: CustomName = {
-      pseudonyme: newPseudonyme.trim(),
-      rename: newRename.trim(),
-      showCrown: false
-    }
-
-    // Ajouter et trier par ordre alphabétique
-    const updated = [...customNames, newItem].sort((a, b) => 
-      a.pseudonyme.localeCompare(b.pseudonyme, 'fr', { sensitivity: 'base' })
-    )
-    setCustomNames(updated)
-    setNewPseudonyme('')
-    setNewRename('')
-  }
-
-  const [editShowCrown, setEditShowCrown] = useState(false)
-
-  const handleEdit = (index: number) => {
-    setEditingIndex(index)
-    setEditPseudonyme(customNames[index].pseudonyme)
-    setEditRename(customNames[index].rename)
-    setEditShowCrown(customNames[index].showCrown || false)
-  }
-
-  const handleSaveEdit = (index: number) => {
-    if (!editPseudonyme.trim()) return
-
-    // Modifier et trier par ordre alphabétique
-    const updated = [...customNames]
-    updated[index] = {
-      pseudonyme: editPseudonyme.trim(),
-      rename: editRename.trim(),
-      showCrown: editShowCrown
-    }
-    const sorted = updated.sort((a, b) => 
-      a.pseudonyme.localeCompare(b.pseudonyme, 'fr', { sensitivity: 'base' })
-    )
-    setCustomNames(sorted)
-    // Trouver le nouvel index après le tri
-    const newIndex = sorted.findIndex(item => 
-      item.pseudonyme === editPseudonyme.trim() && item.rename === editRename.trim()
-    )
-    setEditingIndex(null)
-    setEditPseudonyme('')
-    setEditRename('')
-  }
-
-  const handleCancelEdit = () => {
-    setEditingIndex(null)
-    setEditPseudonyme('')
-    setEditRename('')
-    setEditShowCrown(false)
-  }
-
-  const handleToggleCrown = (index: number) => {
-    const updated = [...customNames]
-    updated[index] = {
-      ...updated[index],
-      showCrown: !updated[index].showCrown
-    }
-    setCustomNames(updated)
-  }
 
   // Fonction pour obtenir la liste filtrée et triée
   const getFilteredAndSortedNames = (): CustomName[] => {
@@ -170,52 +98,6 @@ export default function CustomPage() {
   }
 
   const filteredAndSortedNames = getFilteredAndSortedNames()
-
-  const handleDelete = (index: number) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) {
-      // Utiliser l'index de la liste filtrée pour trouver l'élément dans la liste complète
-      const itemToDelete = filteredAndSortedNames[index]
-      const updated = customNames.filter(item => 
-        item.pseudonyme !== itemToDelete.pseudonyme || item.rename !== itemToDelete.rename
-      )
-      setCustomNames(updated)
-    }
-  }
-
-  const handleSave = async () => {
-    setSaving(true)
-    setSaveMessage('')
-
-    // Construire le contenu CSV
-    const csvContent = [
-      'pseudonyme;rename;showCrown',
-      ...customNames.map(item => `${item.pseudonyme};${item.rename || ''};${item.showCrown ? 'true' : 'false'}`)
-    ].join('\n')
-
-    try {
-      const response = await fetch(getPath('/api/save-custom-names'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ csvContent }),
-      })
-
-      if (response.ok) {
-        setSaveMessage('✅ Sauvegardé avec succès!')
-        setTimeout(() => setSaveMessage(''), 3000)
-      } else {
-        setSaveMessage('❌ Erreur lors de la sauvegarde')
-        setTimeout(() => setSaveMessage(''), 3000)
-      }
-    } catch (error) {
-      console.error('Erreur:', error)
-      setSaveMessage('❌ Erreur lors de la sauvegarde')
-      setTimeout(() => setSaveMessage(''), 3000)
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const handleSaveTheme = (index: number, updatedTheme: Theme) => {
     const updated = [...themes]
@@ -307,61 +189,8 @@ export default function CustomPage() {
         </div>
 
         {/* Section Pseudonymes */}
-        <h2 className="text-2xl font-semibold mb-4 text-white">Gestion des pseudonymes</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-white">Pseudonymes (depuis Google Sheets)</h2>
         
-        {/* Formulaire d'ajout en haut */}
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Ajouter un nouveau pseudonyme</h2>
-          <div className="flex items-end gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Pseudonyme
-              </label>
-              <input
-                type="text"
-                value={newPseudonyme}
-                onChange={(e) => setNewPseudonyme(e.target.value)}
-                placeholder="Nom du pseudonyme"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Renommer en
-              </label>
-              <input
-                type="text"
-                value={newRename}
-                onChange={(e) => setNewRename(e.target.value)}
-                placeholder="Nouveau nom (optionnel)"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
-              />
-            </div>
-            <button
-              onClick={handleAdd}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-            >
-              Ajouter
-            </button>
-          </div>
-        </div>
-
-        {/* Bouton sauvegarder */}
-        <div className="mb-6 flex items-center gap-4">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed font-medium"
-          >
-            {saving ? 'Sauvegarde...' : 'Sauvegarder'}
-          </button>
-          {saveMessage && (
-            <span className="text-sm font-medium text-gray-300">{saveMessage}</span>
-          )}
-        </div>
-
         {/* Liste des pseudonymes */}
         <div className="bg-gray-800 rounded-lg shadow-lg p-6">
           {/* Barre de recherche */}
@@ -378,103 +207,41 @@ export default function CustomPage() {
           <div className="space-y-3">
             {filteredAndSortedNames.length === 0 ? (
               <p className="text-gray-400 text-center py-8">
-                {customNames.length === 0 ? 'Aucun pseudonyme ajouté' : 'Aucun résultat trouvé'}
+                {customNames.length === 0 ? 'Aucun pseudonyme trouvé' : 'Aucun résultat trouvé'}
               </p>
             ) : (
-              filteredAndSortedNames.map((item, index) => {
-                // Trouver l'index réel dans la liste complète pour l'édition
-                const realIndex = customNames.findIndex(customItem => 
-                  customItem.pseudonyme === item.pseudonyme && customItem.rename === item.rename
-                )
-                return (
+              filteredAndSortedNames.map((item, index) => (
                 <div
-                  key={`${item.pseudonyme}-${item.rename}-${realIndex}`}
+                  key={`${item.pseudonyme}-${item.rename}-${index}`}
                   className="flex items-center gap-4 p-4 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors"
                 >
-                  {editingIndex === realIndex ? (
-                    <>
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          value={editPseudonyme}
-                          onChange={(e) => setEditPseudonyme(e.target.value)}
-                          className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          value={editRename}
-                          onChange={(e) => setEditRename(e.target.value)}
-                          placeholder="Nouveau nom (optionnel)"
-                          className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm text-gray-300">Couronne</label>
-                        <input
-                          type="checkbox"
-                          checked={editShowCrown}
-                          onChange={(e) => setEditShowCrown(e.target.checked)}
-                          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-                        />
-                      </div>
-                      <button
-                        onClick={() => handleSaveEdit(realIndex)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                      >
-                        Valider
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors text-sm font-medium"
-                      >
-                        Annuler
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-400 mb-1">
-                          Pseudonyme
-                        </label>
-                        <p className="text-white font-medium">{item.pseudonyme}</p>
-                      </div>
-                      <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-400 mb-1">
-                          Renommer en
-                        </label>
-                        <p className="text-gray-300">{item.rename || '-'}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm text-gray-300">Couronne</label>
-                        <input
-                          type="checkbox"
-                          checked={item.showCrown || false}
-                          onChange={() => handleToggleCrown(realIndex)}
-                          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-                        />
-                      </div>
-                      <button
-                        onClick={() => handleEdit(realIndex)}
-                        className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        onClick={() => handleDelete(index)}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                      >
-                        Supprimer
-                      </button>
-                    </>
-                  )}
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-gray-400 mb-1">
+                      Pseudonyme
+                    </label>
+                    <p className="text-white font-medium">{item.pseudonyme}</p>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-gray-400 mb-1">
+                      Renommer en
+                    </label>
+                    <p className="text-gray-300">{item.rename || '-'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-300">Couronne</label>
+                    <input
+                      type="checkbox"
+                      checked={item.showCrown || false}
+                      disabled
+                      className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded opacity-50 cursor-not-allowed"
+                    />
+                  </div>
                 </div>
-                )
-              })
+              ))
             )}
           </div>
         </div>
+
       </div>
     </div>
   )
