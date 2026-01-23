@@ -5,6 +5,7 @@ import { getThemeColor, THEME_COLORS } from '@/config'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 import SplitText from '@/components/SplitText'
+import { getPath } from '@/utils/path'
 
 type FollowEventDetail = {
   username?: string
@@ -70,7 +71,7 @@ export default function OverlayFollow() {
 
   // Charger les thèmes depuis le fichier JSON
   useEffect(() => {
-    fetch('/data/themes.json')
+    fetch(getPath('/data/themes.json'))
       .then(response => response.json())
       .then(data => {
         const themesList = data.themes || []
@@ -156,7 +157,7 @@ export default function OverlayFollow() {
     const colorForSVG = normalizeColorForSVG(themeColor)
 
     if (isChristmas()) {
-      fetch('/images/icones/snowflake-bold-svgrepo-com.svg')
+      fetch(getPath('/images/icones/snowflake-bold-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)
@@ -171,7 +172,7 @@ export default function OverlayFollow() {
     }
 
     if (isHalloween()) {
-      fetch('/images/icones/pumkin-svgrepo-com.svg')
+      fetch(getPath('/images/icones/pumkin-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)
@@ -186,7 +187,7 @@ export default function OverlayFollow() {
     }
 
     if (isEaster()) {
-      fetch('/images/icones/easter-egg-3-svgrepo-com.svg')
+      fetch(getPath('/images/icones/easter-egg-3-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)

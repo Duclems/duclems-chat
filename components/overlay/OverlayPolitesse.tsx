@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { getThemeColor, THEME_COLORS } from '@/config'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { getPath } from '@/utils/path'
 
 const TIMER_DURATION = 30 * 60 // 2 minutes en secondes
 
@@ -22,7 +23,7 @@ export default function OverlayPolitesse() {
 
   // Charger les thèmes depuis le fichier JSON
   useEffect(() => {
-    fetch('/data/themes.json')
+    fetch(getPath('/data/themes.json'))
       .then(response => response.json())
       .then(data => {
         const themesList = data.themes || []
@@ -108,7 +109,7 @@ export default function OverlayPolitesse() {
     const colorForSVG = normalizeColorForSVG(themeColor)
 
     if (isChristmas()) {
-      fetch('/images/icones/snowflake-bold-svgrepo-com.svg')
+      fetch(getPath('/images/icones/snowflake-bold-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)
@@ -123,7 +124,7 @@ export default function OverlayPolitesse() {
     }
 
     if (isHalloween()) {
-      fetch('/images/icones/pumkin-svgrepo-com.svg')
+      fetch(getPath('/images/icones/pumkin-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)
@@ -138,7 +139,7 @@ export default function OverlayPolitesse() {
     }
 
     if (isEaster()) {
-      fetch('/images/icones/easter-egg-3-svgrepo-com.svg')
+      fetch(getPath('/images/icones/easter-egg-3-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)

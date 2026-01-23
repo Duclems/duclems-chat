@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { getThemeColor, THEME_COLORS } from '@/config'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { getPath } from '@/utils/path'
 
 interface AnnouncementData {
   question: string
@@ -36,7 +37,7 @@ export default function OverlayRami() {
 
   // Charger les thèmes depuis le fichier JSON
   useEffect(() => {
-    fetch('/data/themes.json')
+    fetch(getPath('/data/themes.json'))
       .then(response => response.json())
       .then(data => {
         const themesList = data.themes || []
@@ -122,7 +123,7 @@ export default function OverlayRami() {
     const colorForSVG = normalizeColorForSVG(themeColor)
 
     if (isChristmas()) {
-      fetch('/images/icones/snowflake-bold-svgrepo-com.svg')
+      fetch(getPath('/images/icones/snowflake-bold-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)
@@ -137,7 +138,7 @@ export default function OverlayRami() {
     }
 
     if (isHalloween()) {
-      fetch('/images/icones/pumkin-svgrepo-com.svg')
+      fetch(getPath('/images/icones/pumkin-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)
@@ -152,7 +153,7 @@ export default function OverlayRami() {
     }
 
     if (isEaster()) {
-      fetch('/images/icones/easter-egg-3-svgrepo-com.svg')
+      fetch(getPath('/images/icones/easter-egg-3-svgrepo-com.svg'))
         .then(response => response.text())
         .then(svgContent => {
           let modifiedSVG = svgContent.replace(/fill="#000000"/g, `fill="${colorForSVG}"`)
@@ -356,7 +357,7 @@ export default function OverlayRami() {
                 <div className="flex-shrink-0">
                   <img 
                     ref={imageRef}
-                    src="/images/annonce.png" 
+                    src={getPath('/images/annonce.png')} 
                     alt="Annonce" 
                     className="w-12 h-12"
                   />

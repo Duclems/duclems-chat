@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import MessageList from './MessageList'
 import { TWITCH_CHANNEL, getThemeColor, THEME_COLORS } from '@/config'
+import { getPath } from '@/utils/path'
 
 export interface ChatMessage {
   id: string
@@ -59,7 +60,7 @@ export default function ChatContainer() {
   
   // Charger les thèmes depuis le fichier JSON
   useEffect(() => {
-    fetch('/data/themes.json')
+    fetch(getPath('/data/themes.json'))
       .then(response => response.json())
       .then(data => {
         setThemes(data.themes || [])

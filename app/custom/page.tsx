@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getPath } from '@/utils/path'
 
 interface CustomName {
   pseudonyme: string
@@ -42,7 +43,7 @@ export default function CustomPage() {
 
   useEffect(() => {
     // Charger le fichier CSV
-    fetch('/data/custom-names.csv')
+    fetch(getPath('/data/custom-names.csv'))
       .then(response => response.text())
       .then(text => {
         const lines = text.split('\n').filter(line => line.trim())
@@ -71,7 +72,7 @@ export default function CustomPage() {
       })
 
     // Charger les thèmes
-    fetch('/data/themes.json')
+    fetch(getPath('/data/themes.json'))
       .then(response => response.json())
       .then(data => {
         setThemes(data.themes || [])
@@ -192,7 +193,7 @@ export default function CustomPage() {
     ].join('\n')
 
     try {
-      const response = await fetch('/api/save-custom-names', {
+      const response = await fetch(getPath('/api/save-custom-names'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +229,7 @@ export default function CustomPage() {
     setSaveThemesMessage('')
 
     try {
-      const response = await fetch('/api/save-themes', {
+      const response = await fetch(getPath('/api/save-themes'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
