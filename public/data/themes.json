@@ -1,0 +1,38 @@
+{
+  "themes": [
+    {
+      "name": "default",
+      "color": "#9810fa",
+      "periods": []
+    },
+    {
+      "name": "halloween",
+      "color": "#ff6b35",
+      "periods": []
+    },
+    {
+      "name": "noel",
+      "color": "#fa1167",
+      "periods": [
+        {
+          "startMonth": 11,
+          "startDay": 28,
+          "endMonth": 12,
+          "endDay": 31
+        }
+      ]
+    },
+    {
+      "name": "paques",
+      "color": "#f39c12",
+      "periods": [
+        {
+          "startMonth": 4,
+          "startDay": 1,
+          "endMonth": 4,
+          "endDay": 31
+        }
+      ]
+    }
+  ]
+}
