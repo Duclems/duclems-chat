@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'Oliver Regular';
-  src: url('/Oliver-Regular.ttf') format('truetype');
+  src: var(--font-oliver, url('/Oliver-Regular.ttf')) format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -12,7 +12,7 @@
 
 @font-face {
   font-family: 'Figtree Bold';
-  src: url('/Figtree-Bold.ttf') format('truetype');
+  src: var(--font-figtree, url('/Figtree-Bold.ttf')) format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
