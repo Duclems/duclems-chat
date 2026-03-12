@@ -3,7 +3,7 @@ export const TWITCH_CHANNEL = 'duclems' //remplacer par le nom de la chaîne sou
 
 // Configuration des couleurs selon les périodes (par défaut, sera remplacé par le fichier JSON)
 export const THEME_COLORS = {
-  default: '#9810fa',      // #9810fa pour les jours normaux
+  default: '#fa1167',      // #fa1167 pour les jours normaux
   halloween: '#ff6b35',    //rgb(250, 102, 17) Orange pour Halloween
   noel: '#fa1167',         // #fa1167 pour Noël 
   paques: '#f39c12',       //rgb(56, 250, 17) Jaune/Orange pour Pâques
