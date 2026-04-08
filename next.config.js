@@ -9,6 +9,12 @@ const basePath = isDevelopment
 
 const nextConfig = {
   reactStrictMode: true,
+  // Export statique requis pour GitHub Pages
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
   // Configuration pour GitHub Pages - basePath doit correspondre au nom du dépôt
   // Si votre dépôt est "duclems-chat", l'URL sera: https://username.github.io/duclems-chat/
   // En développement, basePath est vide pour accéder à http://localhost:3000/
