@@ -5,6 +5,9 @@ import FontLoader from '@/components/FontLoader'
 export const metadata: Metadata = {
   title: 'Twitch Chat',
   description: 'Application de chat Twitch en temps réel',
+  icons: {
+    icon: '/logo.png',
+  },
 }
 
 export default function RootLayout({
